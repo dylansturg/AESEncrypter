@@ -23,6 +23,7 @@ void Logger::LogEntry(string action, string message)
 		log << action;
 		log << ": ";
 		log << message;
+		log << endl;
 		log.close();
 	}
 }

@@ -2,9 +2,9 @@
 
 #include "Encrypter.h"
 
-Encrypter::Encrypter(Key encryptKey, vector<DataMatrix> messages, int encryptCount)
+Encrypter::Encrypter(Key & encryptKey, vector<DataMatrix> & messages, int encryptCount)
 {
-	this->encryptionKey = encryptionKey;
+	this->encryptionKey = encryptKey;
 	this->messages = messages;
 	this->encryptCount = encryptCount;
 }
@@ -30,7 +30,7 @@ DataMatrix Encrypter::PerformAES(DataMatrix message)
 	*/
 	message.AddRoundKey(this->encryptionKey.GetRoundKey(0));
 
-	for (int i = 0; i <= 9; i++)
+	for (int i = 1; i <= 9; i++)
 	{
 		message.ByteSubTransform();
 		message.ShiftRowTransform();

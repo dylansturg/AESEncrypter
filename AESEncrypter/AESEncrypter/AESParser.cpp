@@ -23,7 +23,7 @@ pair<Key, vector<DataMatrix>> AESParser::ParseInFile(string filename)
 	string keyLine;
 	getline(file, keyLine);
 
-	vector<unsigned char> keyValue = ParseBinString(keyLine);
+	vector<unsigned char> keyValue = keyLine.size() > 32 ? ParseBinString(keyLine) : ParseHexString(keyLine);
 
 	Key resultKey(keyValue);
 
@@ -32,7 +32,7 @@ pair<Key, vector<DataMatrix>> AESParser::ParseInFile(string filename)
 		string messageLine;
 		getline(file, messageLine);
 
-		messages.push_back(DataMatrix(ParseBinString(messageLine)));
+		messages.push_back(DataMatrix(messageLine.size() > 32 ? ParseBinString(messageLine) : ParseHexString(messageLine)));
 	}
 
 	file.close();
@@ -40,12 +40,34 @@ pair<Key, vector<DataMatrix>> AESParser::ParseInFile(string filename)
 	return pair<Key, vector<DataMatrix>>(resultKey, messages);
 }
 
+vector<unsigned char> AESParser::ParseHexString(string hexstr){
+	vector<unsigned char> parsed;
+	parsed.resize(16);
+	int pos = 0;
+	for (int row = 0; row < 4; row++){
+		for (int col = 0; col < 4; col++){
+			unsigned int x;
+			stringstream ss;
+			ss << hex << hexstr.substr(pos, 2);
+			ss >> x;
+			pos += 2;
+			parsed[col * 4 + row] = x;
+		}
+	}
+	return parsed;
+}
+
 vector<unsigned char> AESParser::ParseBinString(string binary)
 {
 	vector<unsigned char> parsed;
-	for (int i = 0; i < binary.length(); i += 8)
-	{
-		parsed.push_back(ParseByte(binary.substr(i, 8)));
+	parsed.resize(16);
+	int pos = 0;
+	for (int row = 0; row < 4; row++){
+		for (int col = 0; col < 4; col++)
+		{
+			parsed[col * 4 + row] = ParseByte(binary.substr(pos, 8));
+			pos += 8;
+		}
 	}
 	return parsed;
 }

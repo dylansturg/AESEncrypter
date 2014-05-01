@@ -7,7 +7,7 @@
 
 class Encrypter{
 public:
-	Encrypter(Key, vector<DataMatrix>, int);
+	Encrypter(Key&, vector<DataMatrix> &, int);
 
 	DataMatrix EncryptMessage(int);
 

@@ -3,6 +3,10 @@
 #include "Key.h"
 #include "SBox.h"
 
+#include <sstream>
+#include <iostream>
+#include <iomanip>
+
 vector<unsigned char> ColumnXor(vector<unsigned char>, vector<unsigned char>);
 void rotateVector(vector<unsigned char> &);
 void byteSubVector(vector<unsigned char>&);
@@ -14,13 +18,29 @@ Key::Key()
 
 Key::Key(vector<unsigned char> key)
 {
-	this->matrix.insert(this->matrix.begin(), key.begin(), key.end());
+	this->matrix.resize(16);
+	for (int row = 0; row < 4; row++){
+		for (int col = 0; col < 4; col++){
+			this->matrix[row * 4 + col] = key[col * 4 + row];
+		}
+	}
+
+	CalculateExtendedKey();
+}
+
+Key& Key::operator=(Key rhs){
+	this->matrix.clear();
+	this->extendedKey.clear();
+
+	this->matrix.insert(this->matrix.begin(), rhs.matrix.begin(), rhs.matrix.end());
+	this->extendedKey.insert(this->extendedKey.begin(), rhs.extendedKey.begin(), rhs.extendedKey.end());
+	return *this;
 }
 
 void Key::CalculateExtendedKey()
 {
 	this->extendedKey.insert(this->extendedKey.begin(), this->matrix.begin(), this->matrix.end());
-	this->extendedKey.resize(176);
+	this->extendedKey.resize(176, 0);
 
 	for (int i = 4; i < 44; i++)
 	{
@@ -51,7 +71,7 @@ vector<unsigned char> Key::GetRoundKey(int round)
 		vector<unsigned char> col = GetColumn(4 * round + i);
 		for (int j = 0; j < 4; j++)
 		{
-			roundKey[j * 16 + i] = col[j];
+			roundKey[j * 4 + i] = col[j];
 		}
 	}
 	return roundKey;
@@ -62,7 +82,7 @@ vector<unsigned char> Key::GetColumn(int colInd)
 	vector<unsigned char> col;
 	for (int i = 0; i < 4; i++)
 	{
-		col.push_back(this->extendedKey[i * 44 + colInd]);
+		col.push_back(this->extendedKey[colInd*4 + i]);
 	}
 	return col;
 }
@@ -71,8 +91,22 @@ void Key::SetColumn(vector<unsigned char> col, int colInd)
 {
 	for (int i = 0; i < 4; i++)
 	{
-		this->extendedKey[i * 44 + colInd] = col[i];
+		this->extendedKey[colInd*4 + i] = col[i];
 	}
+}
+
+string Key::Dump(){
+	stringstream res;
+
+	for (int i = 0; i < 11; i++){
+		for (int j = 0; j < 16; j++){
+			res << setfill('0') << setw(2) << hex << (int)this->extendedKey[i * 16 + j];
+			res << " ";
+		}
+		res << endl;
+
+	}
+	return res.str();
 }
 
 vector<unsigned char> ColumnXor(vector<unsigned char> x, vector<unsigned char> y)

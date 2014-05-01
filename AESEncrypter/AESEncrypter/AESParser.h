@@ -11,9 +11,12 @@ public:
 
 	pair<Key, vector<DataMatrix>> ParseInFile(string filename);
 
+	vector<unsigned char> ParseBinString(string);
+	vector<unsigned char> ParseHexString(string);
+
 private:
 
-	vector<unsigned char> ParseBinString(string);
+
 	unsigned char ParseByte(string);
 
 };

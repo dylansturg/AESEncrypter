@@ -8,17 +8,26 @@
 
 #include "SBox.h"
 #include "AESParser.h"
+#include "Encrypter.h"
+#include "AESTestVector.h"
+#include "TestVectorParser.h"
+#include "TestBench.h"
 
-#include <bitset>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <iomanip>
 
 using namespace std;
 
 bool verifySBoxAccurate();
 
+#define DEBUG_LOGGING
+
 int main(int argc, char* argv[])
 {
 
-	Logger::SetupLogging("aessturgedlout.txt");
+	Logger::SetupLogging("aessturgedloutlog.txt");
 
 	string input;
 
@@ -35,41 +44,33 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	SBox box;
-
 	printf("You requested %d iterations.\n", iterations);
-
-	printf("Test box looks %s\n", verifySBoxAccurate() ? "Good" : "BAD");
 
 	AESParser parser;
 
-	pair<Key, vector<DataMatrix>> parsed = parser.ParseInFile("testaes.txt");
+	pair<Key, vector<DataMatrix>> parsed = parser.ParseInFile("aesvectors.txt");
 
-	printf("Parsed Key: \n");
+	Encrypter encrypter(parsed.first, parsed.second, iterations);
 
-	for (int i = 0; i < 16; i++){
-		bitset<8> out(parsed.first.matrix[i]);
+	fstream out("aesoutsturgedl.txt", ios::out);
 
-		cout << out;
+	for (int i = 0; i < parsed.second.size(); i++)
+	{
+		DataMatrix cipher = encrypter.EncryptMessage(i);
+		out << "Message " << i << ": \n";
+		out << cipher.BinaryDump() << endl;
+		out << cipher.HexDump() << endl;
 	}
 
-	printf("\n");
+	out.close();
 
-	for (int i = 0; i < parsed.second.size(); i++){
-		printf("Parsed message %d:\n", i);
+	cout << "Done" << endl;
 
-		printf("Parsed Key: \n");
-
-		for (int j = 0; j < 16; j++){
-			bitset<8> out(parsed.second[i].matrix[j]);
-			cout << out;
-		}
-
-		printf("\n");
-	}
-
-	cout << parsed.second[0].BinaryDump();
-
+	/*TestVectorParser testparser;
+	TestBench tester(testparser.ParseFile("AESVectors.rsp"));
+	cout << "It's looking... " << (tester.Run() ? "Good" : "Bad") << endl;
+	
+*/
 
 	getline(cin, input);
 

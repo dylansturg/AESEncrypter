@@ -14,9 +14,11 @@ public:
 	void MixColumnTransform();
 
 	string BinaryDump();
+	string HexDump();
+	string MatrixStyleDump();
 
 private:
 
-
+	vector<unsigned char> GetColumn(int);
 	
 };

@@ -9,6 +9,10 @@ public:
 
 	vector<unsigned char> matrix;
 
+	Key& operator=(Key);
+
+	string Dump();
+
 private:
 	
 	vector<unsigned char> extendedKey;
@@ -17,5 +21,6 @@ private:
 
 	vector<unsigned char> GetColumn(int);
 	void SetColumn(vector<unsigned char>, int);
+	
 
 };
